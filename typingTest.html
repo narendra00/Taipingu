@@ -1,0 +1,262 @@
+<!doctype html>
+<html>
+<head>
+<title>Type</title>
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js" integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+	
+	<script src="js/index.js"></script>
+	<script src="js/jquery-1.7.2.min.js"></script>
+	<link rel="stylesheet" href="css/logIn.css" type="text/css" media="all">
+<style>
+
+body{
+	background-color:#F0FFF0;
+	font-family: "Lucida Console", "Courier New", monospace;
+	 background-image: url("css/images/center-back-light.png");
+	 
+}
+.main {
+	margin-top: 6%;
+	text-align: center;
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+	transition: 0.3s;
+	width: 80%;
+	margin-left:10%;
+	padding-top:2%;
+	padding-bottom:10%;
+	background-color:#FFFFFF;
+	background-image:url("css/images/lady.png"),url("css/images/gentleman.png"),url("css/images/design.png");
+	background-repeat: no-repeat,no-repeat,no-repeat;
+	background-position: left top,bottom right,left bottom;
+	
+}
+
+.ques {
+	color : black;
+}
+
+.answ {
+	color : blue;
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+	transition: 0.3s;
+	width: 80%;
+	margin-left:10%;
+	margin-top:1%;
+	padding-top:2%;
+	padding-bottom:2%;
+}
+
+
+.color-red {
+	color : red;
+}
+
+.color-green {
+	color : green;
+}
+
+#staticBackdrop{
+	margin-top:10%;
+}
+#userName,#totalTWords,#totalCWords,#appri{
+	font-size:20px;
+}
+
+.note{
+	font-size:16px;
+	font-family:"Times New Roman", Times, serif;
+	margin:90px 200px 100px 200px;
+}
+</style>
+</head>
+<body>
+	<div id="Users">
+		<h5 id="UserId1" style="width:400px;text-align:right;">John</h5>
+		<h5 id="UserId">john@123</h5>
+		<div id="circle">
+			<center><img id="myimage" src="css/images/avatar2.png"  ></center>
+		</div>
+	</div>
+<!-- Button trigger modal -->
+<button id="result" type="button" style="display:none;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+  click
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+		<h4>Result</h4>
+        <button type="button" class="btn-close" onclick="window.location.href = 'result.html';" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<h4 id="userName">Name : Babu Bhaiya</h4>
+        <h4 id="totalTWords"></h4>
+		<h4 id="totalCWords"></h4>
+      </div>
+      <div class="modal-footer">
+		<h4 id="appri"></h4>
+        <button type="button" class="btn btn-success" onclick="window.location.href = 'result.html';">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+<h4 id="timer" style="display:none;">01:00</h4>
+<p id="correct-count" style="display:none;">Correct Words : 0</p>
+<h4 class="ques">Type this to start "Bello"</h4>
+<h4 class="answ"></h4>
+<h4 class="note"><span style="color:blue;font-size:20px; font-weight:500;">" Note </span>: This 1-minute test tests the typing speed of words per minute. To go to the next sentence you have to type as it is words. otherwise, the next sentence will not appear.<span style="color:blue; font-size:20px; font-weight:500;">"</span></h4>
+</div>
+<script>
+	$(document).ready(function(){
+		getUserData();
+	});	
+
+
+  var question;
+  
+  firebase.database().ref().child("typing_test").child("para_1").on("value",(s)=>{
+	question = s.val().split("#");
+  });
+  
+
+	
+	
+	var arrayQuestion = document.getElementsByClassName("ques")[0].innerHTML.split(" ");
+	var total = arrayQuestion.length;
+	var yourAnswer = "";
+	var current = 0;
+	var correct = 0;
+	
+
+	var ans = document.getElementsByClassName("answ")[0];
+	document.onkeypress = function(event) {
+		let key = event.keyCode;
+		let val = String.fromCharCode(key);
+		yourAnswer = yourAnswer + val;
+		let ans = document.getElementsByClassName("answ")[0];
+		
+		if (document.getElementById("timer").style.display == "none") {
+			ans.innerHTML = yourAnswer;
+		}
+		
+		if (document.getElementById("timer").style.display == "none" && yourAnswer == "Bello") {
+			document.getElementById("timer").style.display = "inline";
+			document.getElementById("correct-count").style.display = "block";
+			document.getElementsByClassName("ques")[0].innerHTML = question[current];
+			arrayQuestion = document.getElementsByClassName("ques")[0].innerHTML.split(" ");
+			ans.innerHTML = "";
+			yourAnswer = "";
+			startTimer();			
+		}
+		
+		if (document.getElementById("timer").style.display == "inline") {
+			let x = yourAnswer.split(" ");
+			ans.innerHTML = "";
+			let cwords = correct; 
+			for (let i = 0; i < x.length; i++) {
+				if (arrayQuestion[i].length > x[i].length) {
+					ans.innerHTML += "<span class='color-green'>" + x[i] + "</span>";
+				}else{
+					ans.innerHTML += x[i] == arrayQuestion[i] ? x[i] : "<span class='color-red'>" + x[i] + "</span>";
+				}
+				ans.innerHTML += " ";
+				cwords +=  x[i] == arrayQuestion[i] ? 1 : 0;
+			}
+			document.getElementById("correct-count").innerHTML = "Correct Words : " + cwords;
+			if (yourAnswer === document.getElementsByClassName("ques")[0].innerHTML) {
+				current += 1;
+				document.getElementsByClassName("ques")[0].innerHTML = question[current];
+				ans.innerHTML = "";
+				arrayQuestion = document.getElementsByClassName("ques")[0].innerHTML.split(" ");
+				yourAnswer = "";
+				correct = cwords;
+				total += arrayQuestion.length;
+			}
+		}
+		
+	};
+	document.onkeydown = function(event) {
+		if (event.keyCode == 8) {
+			yourAnswer = yourAnswer.substring(0,yourAnswer.length - 1);
+			
+		}
+		
+		if (document.getElementById("timer").style.display == "none") {
+			ans.innerHTML = yourAnswer;
+		}
+		
+		
+		if (document.getElementById("timer").style.display == "inline") {
+			let ans = document.getElementsByClassName("answ")[0];
+			ans.innerHTML = "";
+			let x = yourAnswer.split(" ");
+			for (let i = 0; i < x.length; i++) {
+				if (arrayQuestion[i].length > x[i].length) {
+					ans.innerHTML += "<span class='color-green'>" + x[i] + "</span>";
+				}else{
+					ans.innerHTML += x[i] == arrayQuestion[i] ? x[i] : "<span class='color-red'>" + x[i] + "</span>";
+				}
+				ans.innerHTML += " ";
+			}
+		}
+	}
+	
+	function startTimer() {
+	  var presentTime = document.getElementById('timer').innerHTML;
+	  var timeArray = presentTime.split(/[:]+/);
+	  var m = timeArray[0];
+	  var s = checkSecond((timeArray[1] - 1));
+	  if(s==59 && m>0){m=m-1}
+	  if(m==0 && s==0){
+		let x = yourAnswer.split(" ");
+		let totalW = correct + x.length;
+		if(ans.innerHTML==""){
+			totalW--;
+		  }
+		document.getElementById("totalTWords").innerHTML="Total Type Words : "+totalW;
+		 for (let i = 0; i < x.length; i++) {
+			if (x[i] == arrayQuestion[i]) correct++;
+		 }
+		 if(isSession() && correct>0) saveResult(totalW,correct);
+		 document.getElementById("totalCWords").innerHTML="Total Correct Words : "+correct;
+		 var percent=(correct/totalW)*100;
+		 if(totalW==0) document.getElementById("appri").innerHTML="Try again !!";
+		 if(percent>=80) document.getElementById("appri").innerHTML="Awesome Work !!";
+		 else if(percent<80 && percent >=60) document.getElementById("appri").innerHTML="Good Work !!";
+		 else if(percent<60) document.getElementById("appri").innerHTML="Try hard !!";
+		 document.getElementById("result").click();
+		 document.getElementById("timer").style.display = "none";
+	  }
+	  
+	  document.getElementById('timer').innerHTML =	m + ":" + s;
+	  setTimeout(startTimer, 1000);
+	}
+
+	function checkSecond(sec) {
+	  if (sec < 10 && sec >= 0) {sec = "0" + sec};
+	  if (sec < 0) {sec = "59"};
+	  return sec;
+	}
+	
+	var cur = new Date();
+	function saveResult(totalW,score) {
+		var date=cur.toLocaleDateString().replaceAll('/','-')+"_"+cur.toLocaleTimeString();
+		firebase.database().ref("result").child(sessionStorage.getItem("userId")).child("typing").child(date).child("Total_words").set(totalW);
+		firebase.database().ref("result").child(sessionStorage.getItem("userId")).child("typing").child(date).child("Correct_words").set(score);
+	}
+	
+		    
+		  
+</script>
+</body>
+</html>
